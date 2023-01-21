@@ -10,6 +10,7 @@ on:
         description: tag that needs to publish
         type: string
         required: true
+
 jobs:
   publish:
     uses: oclif/github-workflows/.github/workflows/npmPublish.yml@main

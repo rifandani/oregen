@@ -1,9 +1,8 @@
-name: failureNotifications
+name: Notify Slack On Failed Publish
 
 on:
   workflow_run:
     workflows:
-      - version, tag and github release
       - publish
     types:
       - completed
