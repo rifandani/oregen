@@ -1,0 +1,39 @@
+name: manual release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Branch
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN || github.token }}
+      - name: Conventional Changelog Action
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v3
+        # overriding some of the basic behaviors to just get the changelog
+        with:
+          git-user-name: rifandani
+          git-user-email: ipandani2505@gmail.com
+          github-token: ${{ secrets.GITHUB_TOKEN || github.token }}
+          output-file: false # No file changelog
+          # always do the release, even if there are no semantic commits
+          skip-on-empty: false
+          tag-prefix: ""
+      - name: Get package version
+        uses: notiz-dev/github-action-json-property@release
+        id: packageVersion
+        with:
+          path: "package.json"
+          prop_path: "version"
+      - name: Create Github Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN || github.token }}
+        with:
+          tag_name: ${{ steps.packageVersion.outputs.prop }}
+          release_name: ${{ steps.packageVersion.outputs.prop }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
