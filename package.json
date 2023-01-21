@@ -1,6 +1,6 @@
 {
   "name": "@rifandani/oregen",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A Command Line Interface (CLI) for React to generate components, hooks, view model template, etc.",
   "author": "Tri Rizeki Rifandani",
   "homepage": "https://github.com/rifandani/oregen",
