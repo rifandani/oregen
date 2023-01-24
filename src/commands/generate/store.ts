@@ -1,5 +1,4 @@
 import { CliUx, Flags } from "@oclif/core";
-import { cosmiconfig } from "cosmiconfig";
 import * as fsExtra from "fs-extra";
 import { BaseCommand } from "../../helpers/BaseCommand.helper";
 import {
@@ -32,16 +31,13 @@ export default class GenerateStore extends BaseCommand<typeof GenerateStore> {
   ];
 
   static flags = {
-    type: Flags.string({
-      char: "t",
-      helpGroup: "STORE",
-      description:
-        'The "store" key/type that you have configured in your config file.',
-      default: "default",
-      deprecated: {
-        message: "Not supported yet.",
-      },
-    }),
+    // type: Flags.string({
+    //   char: "t",
+    //   helpGroup: "STORE",
+    //   description:
+    //     'The "store" key/type that you have configured in your config file.',
+    //   default: "default",
+    // }),
     path: Flags.string({
       char: "p",
       helpGroup: "STORE",
@@ -157,18 +153,18 @@ export default class GenerateStore extends BaseCommand<typeof GenerateStore> {
       }
 
       // TODO: check if user input custom "type" flag
-      if (flags.type !== "default") {
-        // read user defined config
-        const explorer = cosmiconfig("regen");
-        const userConfig = await explorer.search();
+      // if (flags.type !== "default") {
+      //   // read user defined config
+      //   const explorer = cosmiconfig("regen");
+      //   const userConfig = await explorer.search();
 
-        if (!userConfig) {
-          this.warn(
-            'There is no config file detected. Please create one, by doing "oregen" config init".'
-          );
-          return;
-        }
-      }
+      //   if (!userConfig) {
+      //     this.warn(
+      //       'There is no config file detected. Please create one, by doing "oregen" config init".'
+      //     );
+      //     return;
+      //   }
+      // }
     });
 
     if (flags["dry-run"]) {

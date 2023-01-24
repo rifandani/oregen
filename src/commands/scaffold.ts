@@ -15,16 +15,13 @@ export default class Scaffold extends BaseCommand<typeof Scaffold> {
   ];
 
   static flags = {
-    type: Flags.string({
-      char: "t",
-      helpGroup: "SCAFFOLD",
-      description:
-        'The "store" key/type that you have configured in your config file.',
-      default: "default",
-      deprecated: {
-        message: "Not supported yet.",
-      },
-    }),
+    // type: Flags.string({
+    //   char: "t",
+    //   helpGroup: "SCAFFOLD",
+    //   description:
+    //     'The "store" key/type that you have configured in your config file.',
+    //   default: "default",
+    // }),
     path: Flags.string({
       char: "p",
       helpGroup: "SCAFFOLD",

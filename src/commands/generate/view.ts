@@ -1,5 +1,4 @@
 import { CliUx, Flags } from "@oclif/core";
-import { cosmiconfig } from "cosmiconfig";
 import * as fsExtra from "fs-extra";
 import { viewTestEnumValues } from "../../constants/view.constant";
 import { ViewTestEnum } from "../../enums/global.enum";
@@ -37,16 +36,13 @@ export default class GenerateView extends BaseCommand<typeof GenerateView> {
   ];
 
   static flags = {
-    type: Flags.string({
-      char: "t",
-      helpGroup: "VIEW",
-      description:
-        'The "view" key/type that you have configured in your config file.',
-      default: "default",
-      deprecated: {
-        message: "Not supported yet.",
-      },
-    }),
+    // type: Flags.string({
+    //   char: "t",
+    //   helpGroup: "VIEW",
+    //   description:
+    //     'The "view" key/type that you have configured in your config file.',
+    //   default: "default",
+    // }),
     path: Flags.string({
       char: "p",
       helpGroup: "VIEW",
@@ -235,18 +231,18 @@ export default class GenerateView extends BaseCommand<typeof GenerateView> {
       }
 
       // TODO: check if user input custom "type" flag
-      if (flags.type !== "default") {
-        // read user defined config
-        const explorer = cosmiconfig("regen");
-        const userConfig = await explorer.search();
+      // if (flags.type !== "default") {
+      //   // read user defined config
+      //   const explorer = cosmiconfig("regen");
+      //   const userConfig = await explorer.search();
 
-        if (!userConfig) {
-          this.warn(
-            'There is no config file detected. Please create one, by doing "oregen" config init".'
-          );
-          return;
-        }
-      }
+      //   if (!userConfig) {
+      //     this.warn(
+      //       'There is no config file detected. Please create one, by doing "oregen" config init".'
+      //     );
+      //     return;
+      //   }
+      // }
     });
 
     if (flags["dry-run"]) {

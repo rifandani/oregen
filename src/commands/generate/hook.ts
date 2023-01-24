@@ -1,5 +1,4 @@
 import { CliUx, Flags } from "@oclif/core";
-import { cosmiconfig } from "cosmiconfig";
 import * as fsExtra from "fs-extra";
 import { hookTestEnumValues } from "../../constants/hook.constant";
 import { HookTestEnum } from "../../enums/global.enum";
@@ -34,16 +33,13 @@ export default class GenerateHook extends BaseCommand<typeof GenerateHook> {
   ];
 
   static flags = {
-    type: Flags.string({
-      char: "t",
-      helpGroup: "HOOK",
-      description:
-        'The "hook" key/type that you have configured in your config file.',
-      default: "default",
-      deprecated: {
-        message: "Not supported yet.",
-      },
-    }),
+    // type: Flags.string({
+    //   char: "t",
+    //   helpGroup: "HOOK",
+    //   description:
+    //     'The "hook" key/type that you have configured in your config file.',
+    //   default: "default",
+    // }),
     path: Flags.string({
       char: "p",
       helpGroup: "HOOK",
@@ -54,7 +50,7 @@ export default class GenerateHook extends BaseCommand<typeof GenerateHook> {
       char: "d",
       helpGroup: "HOOK",
       description:
-        "The description of the hook you want to generate (e.g. Create a counter hook that increments by one when I click on the increment button).",
+        "The description of the hook you want to generate (e.g. Create a counter hook that increments by one when I click on the increment button). You required to have `.env` file with `OPENAI_API_KEY` defined in it.",
       default: undefined,
     }),
     "use-typescript": Flags.boolean({
@@ -171,18 +167,18 @@ export default class GenerateHook extends BaseCommand<typeof GenerateHook> {
       }
 
       // TODO: check if user input custom "type" flag
-      if (flags.type !== "default") {
-        // read user defined config
-        const explorer = cosmiconfig("regen");
-        const userConfig = await explorer.search();
+      // if (flags.type !== "default") {
+      //   // read user defined config
+      //   const explorer = cosmiconfig("regen");
+      //   const userConfig = await explorer.search();
 
-        if (!userConfig) {
-          this.warn(
-            'There is no config file detected. Please create one, by doing "oregen" config init".'
-          );
-          return;
-        }
-      }
+      //   if (!userConfig) {
+      //     this.warn(
+      //       'There is no config file detected. Please create one, by doing "oregen" config init".'
+      //     );
+      //     return;
+      //   }
+      // }
     });
 
     if (flags["dry-run"]) {

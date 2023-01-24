@@ -2,7 +2,7 @@ import { Hook } from "@oclif/core";
 import cfonts from "cfonts";
 
 const hook: Hook<"prerun"> = async function ({ config, Command }) {
-  cfonts.say(config.name, {
+  cfonts.say(config.bin, {
     font: "block",
     colors: ["cyan", "yellow"],
     letterSpacing: 2,
