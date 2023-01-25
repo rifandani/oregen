@@ -69,6 +69,13 @@ export default class GenerateComponent extends BaseCommand<
       summary: "Generate a typescript component.",
       default: false,
     }),
+    "use-twmacro": Flags.boolean({
+      aliases: ["utm"],
+      helpGroup: "COMPONENT",
+      summary: "Generate the component using runtime CSS-in-JS Twin Macro.",
+      default: false,
+      exclusive: ["with-style"],
+    }),
     "with-lazy": Flags.boolean({
       aliases: ["wl"],
       helpGroup: "COMPONENT",
@@ -91,6 +98,7 @@ export default class GenerateComponent extends BaseCommand<
       options: componentStyleEnumValues,
       default: ComponentStyleEnum.none,
       parse: getCommonEnumFlagParser(componentStyleEnumValues),
+      exclusive: ["use-twmacro"],
     }),
     "with-test": Flags.enum<ComponentTestEnum>({
       aliases: ["wt"],
@@ -176,6 +184,16 @@ export default class GenerateComponent extends BaseCommand<
         template = template.replace(` data-testid="TemplateName"`, "");
       }
 
+      if (!flags["use-twmacro"]) {
+        // delete templates related to twin.macro
+        template = template.replace(`import tw from 'twin.macro';`, "");
+        template = template.replace(
+          `const Container = tw.div\`h-full w-full\`;`,
+          ""
+        );
+        template = template.replaceAll("Container", "div"); // target: ES2021
+      }
+
       if (flags["with-style"] !== ComponentStyleEnum.none) {
         // adjust stylesheet import accordingly
         const cssPath = `${itemName}.${flags["with-style"]}`; // e.g. Box.scss
@@ -184,6 +202,13 @@ export default class GenerateComponent extends BaseCommand<
           `styles from './TemplateName.module.css'`,
           `'./${cssPath}'`
         );
+        // delete templates related to twin.macro
+        template = template.replace(`import tw from 'twin.macro';`, "");
+        template = template.replace(
+          `const Container = tw.div\`h-full w-full\`;`,
+          ""
+        );
+        template = template.replaceAll("Container", "div"); // target: ES2021
       } else {
         // if there is no stylesheet, remove `className` attribute and style import from `jsTemplate`
         template = template.replace(` className={styles.TemplateName}`, "");
