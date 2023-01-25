@@ -1,12 +1,14 @@
 export default `import TemplateName from './TemplateName';
 
-export default {
+const Story = {
+  component: TemplateName,
   title: "TemplateName",
 };
+export default Story;
 
-export const Default = () => <TemplateName />;
+const Template = (args) => <TemplateName {...args} />;
 
-Default.story = {
-  name: 'default',
-};
+export const Default = Template.bind({});
+
+Default.args = {};
 `;
