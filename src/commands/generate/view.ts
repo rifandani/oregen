@@ -1,10 +1,11 @@
-import { CliUx, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 import * as fsExtra from "fs-extra";
 import { viewTestEnumValues } from "../../constants/view.constant";
-import { ViewTestEnum } from "../../enums/global.enum";
+import { LogLevelEnum, ViewTestEnum } from "../../enums/global.enum";
 import { BaseCommand } from "../../helpers/BaseCommand.helper";
 import {
   getItemPath,
+  logger,
   replaceItemTemplateName,
 } from "../../helpers/command.helper";
 import jsRouteTemplate from "../../templates/view/jsRoute.template";
@@ -85,29 +86,32 @@ export default class GenerateView extends BaseCommand<typeof GenerateView> {
     itemName: string,
     { template, filename, itemPath }: GenerateItemParams
   ): Promise<void> {
-    // start loading spinner
-    CliUx.ux.action.start(`Generating view`);
-
     // make sure the view does not already exist in the path directory.
     if (fsExtra.existsSync(itemPath)) {
-      CliUx.ux.action.stop(
-        `"${filename}" already exists in this path "${itemPath}"`
+      logger(
+        `"${filename}" already exists in this path "${itemPath}"`,
+        LogLevelEnum.error
       );
+
       // exit process
       this.exit(0);
     }
 
     if (!flags["dry-run"]) {
-      // generate template file
+      if (["debug"].includes(flags["log-level"]))
+        logger(`Generating template file`, flags["log-level"]);
       fsExtra.outputFileSync(itemPath, template);
+
       // replace the placeholder template name with the actual `itemName`
-      replaceItemTemplateName(itemName, itemPath);
+      replaceItemTemplateName(itemName, itemPath, flags);
     }
 
     // success toast
-    CliUx.ux.action.stop(
-      `"${filename}" ${`was successfully created at`} "${itemPath}"`
-    );
+    if (["info", "debug"].includes(flags["log-level"]))
+      logger(
+        `"${filename}" was successfully created at "${itemPath}"`,
+        flags["log-level"]
+      );
   }
 
   async run(): Promise<void> {
@@ -246,7 +250,10 @@ export default class GenerateView extends BaseCommand<typeof GenerateView> {
     });
 
     if (flags["dry-run"]) {
-      this.log(`📝 NOTE: The "dry-run" flag means no changes were made`);
+      logger(
+        `The "dry-run" flag means no changes were made\n`,
+        LogLevelEnum.info
+      );
     }
   }
 }

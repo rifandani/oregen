@@ -12,8 +12,9 @@ export abstract class BaseCommand<T extends typeof Command> extends Command {
   static globalFlags = {
     "log-level": Flags.enum<LogLevelEnum>({
       summary: "Specify level for logging.",
-      options: Object.values(LogLevelEnum),
       helpGroup: "GLOBAL",
+      options: Object.values(LogLevelEnum),
+      default: LogLevelEnum.info,
     }),
     flat: Flags.boolean({
       description:

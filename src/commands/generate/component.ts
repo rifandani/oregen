@@ -1,14 +1,19 @@
-import { CliUx, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 import * as fsExtra from "fs-extra";
 import {
   componentStyleEnumValues,
   componentTestEnumValues,
 } from "../../constants/component.constant";
-import { ComponentStyleEnum, ComponentTestEnum } from "../../enums/global.enum";
+import {
+  ComponentStyleEnum,
+  ComponentTestEnum,
+  LogLevelEnum,
+} from "../../enums/global.enum";
 import { BaseCommand } from "../../helpers/BaseCommand.helper";
 import {
   getCommonEnumFlagParser,
   getItemPath,
+  logger,
   replaceItemTemplateName,
 } from "../../helpers/command.helper";
 import openAiItemTemplateGenerator from "../../services/openAi.service";
@@ -116,48 +121,66 @@ export default class GenerateComponent extends BaseCommand<
     itemName: string,
     { template, filename, itemPath }: GenerateItemParams
   ): Promise<void> {
-    // start loading spinner
-    CliUx.ux.action.start(`Generating component`);
-
     // make sure the component does not already exist in the path directory.
     if (fsExtra.existsSync(itemPath)) {
-      CliUx.ux.action.stop(
-        `"${filename}" already exists in this path "${itemPath}"`
+      logger(
+        `"${filename}" already exists in this path "${itemPath}"`,
+        LogLevelEnum.error
       );
+
       // exit process
       this.exit(0);
     }
 
     if (!flags["dry-run"]) {
-      // generate template file
+      if (["debug"].includes(flags["log-level"]))
+        logger(`Generating template file`, flags["log-level"]);
       fsExtra.outputFileSync(itemPath, template);
+
       // replace the placeholder template name with the actual `itemName`
-      replaceItemTemplateName(itemName, itemPath);
+      replaceItemTemplateName(itemName, itemPath, flags);
     }
 
     // check if we need to generate AI-generated test template instead
     if (flags.describe) {
-      const aiGeneratedTemplate = await openAiItemTemplateGenerator({
-        item: "component",
-        isTest: true,
-        itemTemplate: template,
-        instructions: flags.describe,
-      });
+      try {
+        const aiGeneratedTemplate = await openAiItemTemplateGenerator({
+          item: "component",
+          isTest: true,
+          itemTemplate: template,
+          instructions: flags.describe,
+        });
 
-      // output the file from AI-generated template
-      if (!flags["dry-run"] && aiGeneratedTemplate) {
-        fsExtra.outputFileSync(itemPath, aiGeneratedTemplate.trim());
+        // output the file from AI-generated template
+        if (!flags["dry-run"] && aiGeneratedTemplate) {
+          if (["debug"].includes(flags["log-level"]))
+            logger(
+              `Output the OpenAI generated component template file`,
+              flags["log-level"]
+            );
+          fsExtra.outputFileSync(itemPath, aiGeneratedTemplate.trim());
+        }
+
+        if (["info", "debug"].includes(flags["log-level"]))
+          logger(
+            `OpenAI successfully created the "${filename}" component with the provided description`,
+            flags["log-level"]
+          );
+      } catch (error) {
+        logger(
+          `OpenAI failed to create the "${filename}" component with the provided description`,
+          LogLevelEnum.error,
+          error
+        );
       }
-
-      CliUx.ux.action.stop(
-        `OpenAI successfully created the ${`"${filename}"`} component with the provided description`
-      );
     }
 
     // success toast
-    CliUx.ux.action.stop(
-      `"${filename}" ${`was successfully created at`} "${itemPath}"`
-    );
+    if (["info", "debug"].includes(flags["log-level"]))
+      logger(
+        `"${filename}" was successfully created at "${itemPath}"`,
+        flags["log-level"]
+      );
   }
 
   async run(): Promise<void> {
@@ -318,7 +341,10 @@ export default class GenerateComponent extends BaseCommand<
     });
 
     if (flags["dry-run"]) {
-      this.log(`📝 NOTE: The "dry-run" flag means no changes were made`);
+      logger(
+        `The "dry-run" flag means no changes were made\n`,
+        LogLevelEnum.info
+      );
     }
   }
 }

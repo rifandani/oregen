@@ -1,8 +1,10 @@
-import { CliUx, Flags } from "@oclif/core";
+import { Flags } from "@oclif/core";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { reactBoilerplateUrl } from "../constants/scaffold.constant";
+import { LogLevelEnum } from "../enums/global.enum";
 import { BaseCommand } from "../helpers/BaseCommand.helper";
+import { logger } from "../helpers/command.helper";
 
 const execAsync = promisify(exec);
 
@@ -38,7 +40,9 @@ export default class Scaffold extends BaseCommand<typeof Scaffold> {
   };
 
   // Get a repo name from input user `url` or config file `cliConfigFile.scaffold.default.url`
-  getRepoNameFromUrl(url: string) {
+  getRepoNameFromUrl(flags: Scaffold["flags"], url: string) {
+    if (["debug"].includes(flags["log-level"]))
+      logger(`Get repo name from url`, flags["log-level"]);
     const splittedUrl = url.split("/");
     const repoName = splittedUrl[splittedUrl.length - 1].split(".")[0];
 
@@ -47,33 +51,50 @@ export default class Scaffold extends BaseCommand<typeof Scaffold> {
 
   async executeScaffolding(flags: Scaffold["flags"], url: string) {
     const args = [url];
-    const repoName = this.getRepoNameFromUrl(url);
+    const repoName = this.getRepoNameFromUrl(flags, url);
 
     // specify the path, if available
     if (flags.path) {
       if (flags.path.charAt(0) === ".") {
-        console.warn(
-          `It's not possible to specify a relative path as an argument`
+        logger(
+          `It's not possible to specify a relative path as an argument`,
+          LogLevelEnum.error
         );
         return;
       }
+
       args.push(flags.path);
     }
 
     // start loading spinner
-    CliUx.ux.action.start(`Scaffolding project`);
+    if (["info", "debug"].includes(flags["log-level"]))
+      logger(
+        `Scaffolding project${
+          repoName ? ` "${repoName}"` : ""
+        }. Please wait...\n`,
+        flags["log-level"]
+      );
 
     // git clone a boilerplate project
     if (!flags["dry-run"]) {
+      if (["DEBUG"].includes(flags["log-level"]))
+        logger(`Executing git clone`, flags["log-level"]);
       await execAsync(`git clone ${args.join(" ")}`);
     }
 
     // success toast
-    CliUx.ux.action.stop(
-      `"${repoName}" was successfully created${
-        flags.path ? ` at "./${flags.path}"` : "."
-      }`
-    );
+    if (["info", "debug"].includes(flags["log-level"])) {
+      logger(
+        `Scaffolding project${repoName ? ` "${repoName}"` : ""} success.`,
+        flags["log-level"]
+      );
+
+      if (repoName)
+        logger(
+          `You can access the project by typing "cd ${repoName}" in the root level of your project.`,
+          flags["log-level"]
+        );
+    }
   }
 
   async run(): Promise<void> {
@@ -88,7 +109,10 @@ export default class Scaffold extends BaseCommand<typeof Scaffold> {
     }
 
     if (flags["dry-run"]) {
-      this.log(`📝 NOTE: The "dry-run" flag means no changes were made`);
+      logger(
+        `The "dry-run" flag means no changes were made\n`,
+        LogLevelEnum.info
+      );
     }
   }
 }
