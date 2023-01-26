@@ -1,8 +1,8 @@
 export enum LogLevelEnum {
-  debug = "debug",
-  info = "info",
-  warn = "warn",
   error = "error",
+  warn = "warn",
+  info = "info",
+  debug = "debug",
 }
 
 export enum ComponentTestEnum {
